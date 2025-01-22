@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
-import {QrReader} from "react-qr-reader";
+// import {QrReader} from "react-qr-reader";
 
 export default function Scanner() {
 
@@ -61,7 +61,7 @@ export default function Scanner() {
                 <h1>QR Reader</h1>
 
                 <div className="container">
-                    <QrReader onResult={handleScan} constraints={{ facingMode: "environment" }} style={{ width: "100%" }}></QrReader>
+                    {/* <QrReader onResult={handleScan} constraints={{ facingMode: "environment" }} style={{ width: "100%" }}></QrReader> */}
                 </div>
 
                 {scanResult && (
