@@ -19,18 +19,15 @@ export default function Scanner() {
             enableFullScreen();
         }
 
-        const preventBackNavigation = () => {
-            window.history.pushState(null, null, window.location.href);
-        }
-
-        window.history.pushState(null, null, window.location.href);
-        window.addEventListener("popstate", preventBackNavigation);
-
         const handleBeforeUnload = (e) => {
             e.preventDefault();
             e.returnValue = "Do you want to exit from the event?";
+            handleLogout();
         };
-        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        const preventBackNavigation = () => {
+            window.history.pushState(null, null, window.location.href);
+        }
 
         const handleNavigationAttempt = (e) => {
             e.preventDefault();
@@ -38,16 +35,17 @@ export default function Scanner() {
             if (!confirmExit) {
                 window.history.pushState(null, null, window.location.href);
             } else {
-                localStorage.clear();
-                setIsLoggedIn(false);
-                navigate("/login");
+                handleLogout();
             }
         };
+
+        window.history.pushState(null, null, window.location.href);
+        window.addEventListener("popstate", preventBackNavigation);     
         window.addEventListener("popstate", handleNavigationAttempt);
+        window.addEventListener("beforeunload", handleBeforeUnload);
 
         return () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
-            window.removeEventListener("popstate", preventBackNavigation);
             window.removeEventListener("popstate", handleNavigationAttempt);
         };
 
