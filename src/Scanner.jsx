@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
+import { QrReader } from "react-qr-reader";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import db from "./firebase/firebase-config";
 
 export default function Scanner() {
 
-    // const [scanResult, setScanResult] = useState("");
+    const [scanResult, setScanResult] = useState("");
 
     const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') == "true");
 
@@ -12,27 +15,42 @@ export default function Scanner() {
     useEffect(() => {
         if (!isLoggedIn) {
             navigate('/login');
-        }
-
-        const handleBeforeUnload = (e) => {
-            e.preventDefault();
-            e.returnValue = "";
+        } else {
+            enableFullScreen();
         }
 
         const preventBackNavigation = () => {
             window.history.pushState(null, null, window.location.href);
         }
 
-        window.addEventListener("beforeunload", handleBeforeUnload);
         window.history.pushState(null, null, window.location.href);
         window.addEventListener("popstate", preventBackNavigation);
+
+        const handleBeforeUnload = (e) => {
+            e.preventDefault();
+            e.returnValue = "Do you want to exit from the event?";
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
 
         return () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
             window.removeEventListener("popstate", preventBackNavigation);
         };
 
-    }, [])
+    }, [isLoggedIn, navigate])
+
+    const enableFullScreen = () => {
+        const element = document.documentElement;
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen(); // Firefox
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen(); // Chrome, Safari, Opera
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen(); // IE/Edge
+        }
+    };
 
     const handleLogout = () => {
         const confirmLogout = window.confirm("Are you sure to Quit the Event?");
@@ -44,31 +62,60 @@ export default function Scanner() {
         }
     }
 
-    // const handleScan = (result, error) => {
-    //     if (result) {
-    //         setScanResult(result.text);
-    //     }
+    const handleScan = async (result, error) => {
+        if (result) {
+            const encryptedClue = result.text;
+            setScanResult(encryptedClue);
 
-    //     if (error) {
-    //         console.error("QR Scan Error:", error);
-    //     }
-    // };
+            try {
+                const clueRef = collection(db, "clue");
+                const q = query(clueRef, where("encryptedClue", "==", encryptedClue));
+
+                const querySnapShot = await getDocs(q);
+
+                if (querySnapShot.empty) {
+                    console.log("No Matching Found !!!");
+                } else {
+                    querySnapShot.forEach((doc) => {
+                        console.log("Found clue:", doc.id, "=>", doc.data())
+                    })
+
+                    navigate('/question');
+                }
+            } catch (error) {
+                console.error("Error query firebase", error);
+            }
+
+        }
+
+        if (error) {
+            console.error("QR Scan Error:", error);
+        }
+    };
 
     return (
         <>
-            <div>
-                <h1>QR Reader</h1>
+            <div className="container vh-100">
+                <br /><br />
+                <h3 className="text-center">Scan Here</h3>
 
-                {/* {scanResult && (
+                {scanResult && (
                     <div style={{ marginTop: "20px" }}>
-                        <h2>Scanned Result:</h2>
                         <p>{scanResult}</p>
                     </div>
-                )} */}
+                )}
 
-                <button onClick={handleLogout} className="btn btn-danger">
-                    Quit Event
-                </button>
+                <QrReader
+                    onResult={handleScan}
+                    constraints={{ facingMode: "environment" }}
+                    style={{ width: "100%" }}
+                />
+
+                <div className="text-center">
+                    <button onClick={handleLogout} className="btn btn-danger">
+                        Quit Event
+                    </button>
+                </div>
             </div>
         </>
     )

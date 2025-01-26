@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import code_logo from "../public/code.png";
-import qr_logo from "../public/qr-code.png";
+import code_logo from "../public/images/coding.png";
+import qr_logo from "../public/images/qr-code.png";
 import db from "./firebase/firebase-config";
 import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
@@ -117,7 +117,7 @@ export default function Login() {
 
     return (
         <>
-            <div className="container mt-5">
+            <div className="container mt-5 vh-100">
                 <div className="text-center d-flex justify-content-around">
                     <img src={qr_logo} width={100} alt="code_logo" />
                     <img src={code_logo} width={100} alt="code_logo" />
