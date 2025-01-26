@@ -71,7 +71,7 @@ export default function Question() {
                 Swal.fire({
                     icon: 'success',
                     title: 'Congratulations!',
-                    text: `<b> Here is your clue: ${decryptedClue}</b>`,
+                    text: `<b>Here is your clue: ${decryptedClue}</b>`,
                 });
 
                 setQuestion(null);

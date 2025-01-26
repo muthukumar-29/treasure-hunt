@@ -128,7 +128,7 @@ export default function Scanner() {
                 />
 
                 <div className="text-center">
-                    <button onClick={handleLogout} className="btn btn-danger">
+                    <button onClick={handleLogout} className="btn btn-danger mt-3">
                         Quit Event
                     </button>
                 </div>
