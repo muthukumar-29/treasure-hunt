@@ -89,7 +89,11 @@ export default function Scanner() {
                     console.log("No Matching Found !!!");
                 } else {
                     querySnapShot.forEach((doc) => {
+                        // const data = doc.data();
                         console.log("Found clue:", doc.id, "=>", doc.data())
+
+                        localStorage.setItem("encryptedClue", encryptedClue);
+                        // localStorage.setItem("clueData", JSON.stringify(data));
                     })
 
                     navigate('/question');
