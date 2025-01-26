@@ -32,9 +32,23 @@ export default function Scanner() {
         };
         window.addEventListener("beforeunload", handleBeforeUnload);
 
+        const handleNavigationAttempt = (e) => {
+            e.preventDefault();
+            const confirmExit = window.confirm("Do you want to exit from the event?");
+            if (!confirmExit) {
+                window.history.pushState(null, null, window.location.href);
+            } else {
+                localStorage.clear();
+                setIsLoggedIn(false);
+                navigate("/login");
+            }
+        };
+        window.addEventListener("popstate", handleNavigationAttempt);
+
         return () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
             window.removeEventListener("popstate", preventBackNavigation);
+            window.removeEventListener("popstate", handleNavigationAttempt);
         };
 
     }, [isLoggedIn, navigate])
