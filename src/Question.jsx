@@ -61,23 +61,23 @@ export default function Question() {
         if (answer.trim().toLowerCase() === question.answer.trim().toLowerCase()) {
             try {
 
-                const userId = localStorage.getItem("userId") || "anonymous";
+                const lotNumber = localStorage.getItem("lotNumber") || "anonymous";
 
                 const questionDoc = doc(db, "queries", question.id);
-                await updateDoc(questionDoc, { answered: 1, answeredBy: userId });
+                await updateDoc(questionDoc, { answered: 1, answeredBy: lotNumber });
 
                 const decryptedClue = CryptoJS.AES.decrypt(encrypted, secretKey).toString(CryptoJS.enc.Utf8);
 
                 Swal.fire({
                     icon: 'success',
                     title: 'Congratulations!',
-                    text: `You have successfully answered the question! Here is your clue: ${decryptedClue}`,
+                    text: `<b> Here is your clue: ${decryptedClue}</b>`,
                 });
 
                 setQuestion(null);
 
                 navigate("/")
-                
+
             } catch (error) {
                 console.error("Error updating Firestore:", error);
             }
