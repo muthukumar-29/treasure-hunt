@@ -117,6 +117,10 @@ export default function Login() {
 
     return (
         <>
+            {/* <div>
+                <img src="../public/images/qs.png" alt="" className="img-fluid" />
+            </div> */}
+            
             <div className="container mt-5 vh-100">
                 <div className="text-center d-flex justify-content-around">
                     <img src={qr_logo} width={100} alt="code_logo" />

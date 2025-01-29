@@ -1,6 +1,6 @@
 import CryptoJS from "crypto-js"
 import { useState, useEffect } from "react";
-import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
+import { collection, getDocs, query, where, updateDoc, doc, arrayUnion } from "firebase/firestore";
 import db from "./firebase/firebase-config";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
@@ -24,8 +24,10 @@ export default function Question() {
     useEffect(() => {
         const fetchQuestion = async () => {
             try {
+                const lotNumber = localStorage.getItem('lotNumber') || 'ananymous';
                 const queriesRef = collection(db, "queries");
-                const unansweredQuery = query(queriesRef, where("answered", "==", 0));
+                // const unansweredQuery = query(queriesRef, where("answered", "==", 0));
+                const unansweredQuery = query(queriesRef, where("answeredBy", "not-in", [lotNumber]));
                 const querySnapShot = await getDocs(unansweredQuery);
 
                 const questions = [];
@@ -41,8 +43,16 @@ export default function Question() {
                     const randomIndex = Math.floor(Math.random() * questions.length);
                     const randomQuestion = questions[randomIndex];
                     console.log("Random Question:", randomQuestion);
+
+                    // if (!randomQuestion.answered || randomQuestion.answered === 0) {
                     setQuestion(randomQuestion)
+
+                    //     const questionDocRef = doc(db, "queries", randomQuestion.id)
+                    //     await updateDoc(questionDocRef, { answered: 1 });
+                    //     console.log(`Updated Question ${randomQuestion.id} to answered`);
+                    // }
                 }
+
             } catch (error) {
                 console.error("Error fetching question" + error)
             } finally {
@@ -64,14 +74,18 @@ export default function Question() {
                 const lotNumber = localStorage.getItem("lotNumber") || "anonymous";
 
                 const questionDoc = doc(db, "queries", question.id);
-                await updateDoc(questionDoc, { answered: 1, answeredBy: lotNumber });
+                // await updateDoc(questionDoc, { answered: 1, answeredBy: lotNumber });
+                // await updateDoc(questionDoc, { answeredBy: lotNumber });
+                await updateDoc(questionDoc, {
+                    answeredBy: arrayUnion(lotNumber)
+                });
 
                 const decryptedClue = CryptoJS.AES.decrypt(encrypted, secretKey).toString(CryptoJS.enc.Utf8);
 
                 Swal.fire({
                     icon: 'success',
                     title: 'Congratulations!',
-                    text: `<b>Here is your clue: ${decryptedClue}</b>`,
+                    text: `Here is your clue: ${decryptedClue}`,
                 });
 
                 setQuestion(null);
