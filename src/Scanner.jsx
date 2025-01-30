@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { QrReader } from "react-qr-reader";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import db from "./firebase/firebase-config";
+import Swal from "sweetalert2";
 
 export default function Scanner() {
 
@@ -30,11 +31,18 @@ export default function Scanner() {
 
             setEventStatus(queryList);
 
-            const userCompletedLevels = queryList.filter(eventstatus => eventstatus.answeredBy === localStorage.getItem('userId')).length;
+            const lotNumber = localStorage.getItem('lotNumber');
+            const userCompletedLevels = queryList.filter(event => event.lotNumber === lotNumber).length;
+
+            console.log(`User ${lotNumber} has completed ${userCompletedLevels} levels.`);
 
             if (userCompletedLevels >= 6) {
                 setTimeout(() => {
-                    alert("Congratulations! You have successfully completed all 6 levels.");
+                    Swal.fire({
+                        title: "Congratulations !!!",
+                        text: "You have successfully completed all 6 levels.",
+                        icon: "success"
+                    });
                     handleLogout();
                 }, 1000);
             }
@@ -49,8 +57,8 @@ export default function Scanner() {
         if (!isLoggedIn) {
             navigate('/login');
         } else {
-            fetchEventStatus();
             enableFullScreen();
+            fetchEventStatus();
         }
 
         const handleBeforeUnload = (e) => {
