@@ -1,21 +1,55 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { QrReader } from "react-qr-reader";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import db from "./firebase/firebase-config";
 
 export default function Scanner() {
 
     const [scanResult, setScanResult] = useState("");
+    const [eventstatus, setEventStatus] = useState([]);
 
     const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') == "true");
 
     const navigate = useNavigate();
 
+    const fetchEventStatus = async () => {
+        try {
+            const eventRef = collection(db, "event");
+
+            const eventQuery = query(eventRef, orderBy("currentDateAndTime"))
+
+            const querySnapshot = await getDocs(eventQuery);
+
+            const queryList = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }))
+
+            console.log(queryList);
+
+            setEventStatus(queryList);
+
+            const userCompletedLevels = queryList.filter(eventstatus => eventstatus.answeredBy === localStorage.getItem('userId')).length;
+
+            if (userCompletedLevels >= 6) {
+                setTimeout(() => {
+                    alert("Congratulations! You have successfully completed all 6 levels.");
+                    handleLogout();
+                }, 1000);
+            }
+
+        } catch (error) {
+            console.error("error to fetch Event status", error);
+        }
+    }
+
+
     useEffect(() => {
         if (!isLoggedIn) {
             navigate('/login');
         } else {
+            fetchEventStatus();
             enableFullScreen();
         }
 
@@ -40,7 +74,7 @@ export default function Scanner() {
         };
 
         window.history.pushState(null, null, window.location.href);
-        window.addEventListener("popstate", preventBackNavigation);     
+        window.addEventListener("popstate", preventBackNavigation);
         window.addEventListener("popstate", handleNavigationAttempt);
         window.addEventListener("beforeunload", handleBeforeUnload);
 
@@ -49,7 +83,7 @@ export default function Scanner() {
             window.removeEventListener("popstate", handleNavigationAttempt);
         };
 
-    }, [handleLogout, isLoggedIn, navigate])
+    }, [isLoggedIn, navigate])
 
     const enableFullScreen = () => {
         const element = document.documentElement;
@@ -117,7 +151,7 @@ export default function Scanner() {
 
                 {scanResult && (
                     <div style={{ marginTop: "20px" }}>
-                        <p>{scanResult}</p>
+                        {/* <p>{scanResult}</p> */}
                     </div>
                 )}
 

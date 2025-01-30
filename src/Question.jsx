@@ -1,15 +1,16 @@
 import CryptoJS from "crypto-js"
 import { useState, useEffect } from "react";
-import { collection, getDocs, updateDoc, doc, arrayUnion } from "firebase/firestore";
+import { collection, getDocs, updateDoc, doc, arrayUnion, addDoc } from "firebase/firestore";
 import db from "./firebase/firebase-config";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+
 
 export default function Question() {
 
     const navigate = useNavigate();
 
-    const [question, setQuestion] = useState(null); // State to hold the fetched question
+    const [question, setQuestion] = useState(null);
     const [loading, setLoading] = useState(true);
     const [answer, setAnswer] = useState("");
 
@@ -77,6 +78,11 @@ export default function Question() {
                 await updateDoc(questionDoc, {
                     answeredBy: arrayUnion(lotNumber)
                 });
+
+                const eventRef = collection(db, "event");
+                const currentDateAndTime = new Date();
+                const qID = question.id;
+                await addDoc(eventRef, {lotNumber, qID, currentDateAndTime })
 
                 const decryptedClue = CryptoJS.AES.decrypt(encrypted, secretKey).toString(CryptoJS.enc.Utf8);
 
