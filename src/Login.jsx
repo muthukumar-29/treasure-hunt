@@ -18,7 +18,7 @@ export default function Login() {
         if (!isLoggedIn) {
             navigate("/login");
         } else {
-            navigate("/");
+            navigate("/qr-scanner");
         }
 
     }, [isLoggedIn, navigate]);
@@ -105,7 +105,7 @@ export default function Login() {
             setEmail("");
             setLotNumber("");
 
-            navigate("/scan");
+            navigate("/qr-scanner");
         } else {
             Swal.fire({
                 icon: "error",

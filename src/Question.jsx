@@ -1,6 +1,6 @@
 import CryptoJS from "crypto-js"
 import { useState, useEffect } from "react";
-import { collection, getDocs, query, where, updateDoc, doc, arrayUnion } from "firebase/firestore";
+import { collection, getDocs, updateDoc, doc, arrayUnion } from "firebase/firestore";
 import db from "./firebase/firebase-config";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
@@ -22,35 +22,33 @@ export default function Question() {
 
 
     useEffect(() => {
+
         const fetchQuestion = async () => {
             try {
                 const lotNumber = localStorage.getItem('lotNumber') || 'ananymous';
                 const queriesRef = collection(db, "queries");
-                // const unansweredQuery = query(queriesRef, where("answered", "==", 0));
-                const unansweredQuery = query(queriesRef, where("answeredBy", "not-in", [lotNumber]));
-                const querySnapShot = await getDocs(unansweredQuery);
+
+                const querySnapShot = await getDocs(queriesRef);
 
                 const questions = [];
                 querySnapShot.forEach((doc) => {
-                    questions.push({ id: doc.id, ...doc.data() })
-                })
+                    const questionData = doc.data();
+                    console.log(questionData.answeredBy);
+                    questions.push({ id: doc.id, ...questionData });
+                });
 
+                const unansweredQuestions = questions.filter((question) => {
+                    return !question.answeredBy.includes(lotNumber); 
+                });
 
-                if (questions.length == 0) {
+                if (unansweredQuestions.length === 0) {
                     console.log("No unanswered questions found!");
-                    setQuestion(null);
+                    setQuestion(null); 
                 } else {
-                    const randomIndex = Math.floor(Math.random() * questions.length);
-                    const randomQuestion = questions[randomIndex];
-                    console.log("Random Question:", randomQuestion);
+                    const randomIndex = Math.floor(Math.random() * unansweredQuestions.length);
+                    const randomQuestion = unansweredQuestions[randomIndex];
 
-                    // if (!randomQuestion.answered || randomQuestion.answered === 0) {
-                    setQuestion(randomQuestion)
-
-                    //     const questionDocRef = doc(db, "queries", randomQuestion.id)
-                    //     await updateDoc(questionDocRef, { answered: 1 });
-                    //     console.log(`Updated Question ${randomQuestion.id} to answered`);
-                    // }
+                    setQuestion(randomQuestion); 
                 }
 
             } catch (error) {
@@ -88,9 +86,7 @@ export default function Question() {
                     text: `Here is your clue: ${decryptedClue}`,
                 });
 
-                setQuestion(null);
-
-                navigate("/")
+                navigate("/qr-scanner")
 
             } catch (error) {
                 console.error("Error updating Firestore:", error);
@@ -112,8 +108,14 @@ export default function Question() {
 
             {!loading && question && (
                 <div className="container">
-                    <h4>{question.question || "No question text available"}</h4>
-
+                    {question ? (
+                        <>
+                            {question.question && <h4>{question.question}</h4>}
+                            {question.filePath && <img src={`https://treasure-hunt-uploads.onrender.com${question.filePath}`} alt="Question Image" className="img-fluid" />}
+                        </>
+                    ) : (
+                        <p>No questions to view</p>
+                    )}
                     <div>
                         <form onSubmit={handleSubmit}>
                             <input type="text" className="form-control" placeholder="Answer" onChange={(e) => setAnswer(e.target.value)} required />
