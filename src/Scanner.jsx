@@ -49,7 +49,7 @@ export default function Scanner() {
             window.removeEventListener("popstate", handleNavigationAttempt);
         };
 
-    }, [isLoggedIn, navigate])
+    }, [handleLogout, isLoggedIn, navigate])
 
     const enableFullScreen = () => {
         const element = document.documentElement;
