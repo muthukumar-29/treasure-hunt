@@ -14,12 +14,76 @@ export default function Question() {
     const [loading, setLoading] = useState(true);
     const [answer, setAnswer] = useState("");
 
+    const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') == "true");
+
     const encrypted = localStorage.getItem("encryptedClue") || "";
     const secretKey = "my-secret-key"
 
     // const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
     // const decrypted = bytes.toString(CryptoJS.enc.Utf8);
     // console.log("Decrypted:" + decrypted);
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            navigate('/login');
+        } else {
+            enableFullScreen();
+        }
+
+        const handleBeforeUnload = (e) => {
+            e.preventDefault();
+            e.returnValue = "Do you want to exit from the event?";
+            handleLogout();
+        };
+
+        const preventBackNavigation = () => {
+            window.history.pushState(null, null, window.location.href);
+        }
+
+        const handleNavigationAttempt = (e) => {
+            e.preventDefault();
+            const confirmExit = window.confirm("Do you want to exit from the event?");
+            if (!confirmExit) {
+                window.history.pushState(null, null, window.location.href);
+            } else {
+                handleLogout();
+            }
+        };
+
+        window.history.pushState(null, null, window.location.href);
+        window.addEventListener("popstate", preventBackNavigation);
+        window.addEventListener("popstate", handleNavigationAttempt);
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            window.removeEventListener("popstate", handleNavigationAttempt);
+        };
+
+    }, [isLoggedIn, navigate])
+
+    const enableFullScreen = () => {
+        const element = document.documentElement;
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen(); // Firefox
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen(); // Chrome, Safari, Opera
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen(); // IE/Edge
+        }
+    };
+
+    const handleLogout = () => {
+        const confirmLogout = window.confirm("Are you sure to Quit the Event?");
+
+        if (confirmLogout) {
+            navigate("/login");
+            localStorage.clear();
+            setIsLoggedIn(false);
+        }
+    }
 
 
     useEffect(() => {
@@ -39,17 +103,17 @@ export default function Question() {
                 });
 
                 const unansweredQuestions = questions.filter((question) => {
-                    return !question.answeredBy.includes(lotNumber); 
+                    return !question.answeredBy.includes(lotNumber);
                 });
 
                 if (unansweredQuestions.length === 0) {
                     console.log("No unanswered questions found!");
-                    setQuestion(null); 
+                    setQuestion(null);
                 } else {
                     const randomIndex = Math.floor(Math.random() * unansweredQuestions.length);
                     const randomQuestion = unansweredQuestions[randomIndex];
 
-                    setQuestion(randomQuestion); 
+                    setQuestion(randomQuestion);
                 }
 
             } catch (error) {
@@ -82,7 +146,7 @@ export default function Question() {
                 const eventRef = collection(db, "event");
                 const currentDateAndTime = new Date();
                 const qID = question.id;
-                await addDoc(eventRef, {lotNumber, qID, currentDateAndTime })
+                await addDoc(eventRef, { lotNumber, qID, currentDateAndTime })
 
                 const decryptedClue = CryptoJS.AES.decrypt(encrypted, secretKey).toString(CryptoJS.enc.Utf8);
 
@@ -126,7 +190,7 @@ export default function Question() {
                         <form onSubmit={handleSubmit}>
                             <input type="text" className="form-control" placeholder="Answer" onChange={(e) => setAnswer(e.target.value)} required />
 
-                            <button type="submit" className="btn btn-primary text-white mt-3">Submit</button>
+                            <button type="submit" className="btn btn-primary text-white mt-3 w-100">Submit</button>
                         </form>
                     </div>
 

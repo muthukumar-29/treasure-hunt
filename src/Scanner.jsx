@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 export default function Scanner() {
 
     const [scanResult, setScanResult] = useState("");
-    const [eventstatus, setEventStatus] = useState([]);
+    const [eventData, setEventStatus] = useState([]);
 
     const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') == "true");
 
@@ -43,7 +43,11 @@ export default function Scanner() {
                         text: "You have successfully completed all 6 levels.",
                         icon: "success"
                     });
-                    handleLogout();
+
+                    localStorage.clear();
+                    setIsLoggedIn(false);
+                    navigate("/login");
+
                 }, 1000);
             }
 
@@ -122,6 +126,14 @@ export default function Scanner() {
             setScanResult(encryptedClue);
 
             try {
+
+                let scannedQrList = JSON.parse(localStorage.getItem("scannedQrList")) || [];
+
+                if (scannedQrList.includes(encryptedClue)) {
+                    alert("You have already scanned this QR code!");
+                    return;
+                }
+
                 const clueRef = collection(db, "clue");
                 const q = query(clueRef, where("encryptedClue", "==", encryptedClue));
 
@@ -135,8 +147,10 @@ export default function Scanner() {
                         console.log("Found clue:", doc.id, "=>", doc.data())
 
                         localStorage.setItem("encryptedClue", encryptedClue);
-                        // localStorage.setItem("clueData", JSON.stringify(data));
                     })
+
+                    scannedQrList.push(encryptedClue);
+                    localStorage.setItem("scannedQrList", JSON.stringify(scannedQrList));
 
                     navigate('/question');
                 }
