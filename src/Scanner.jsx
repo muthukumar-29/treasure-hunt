@@ -73,23 +73,30 @@ export default function Scanner() {
         window.history.pushState(null, null, window.location.href);
         window.addEventListener("popstate", preventBackNavigation);
 
-        // Logout on Browser Close, Refresh, or Tab Switch
+        // Ask Confirmation Before Logout on Browser Close or Refresh
         const handleExitEvent = (e) => {
             e.preventDefault();
-            handleLogout();
+            e.returnValue = "Are you sure you want to leave the event?";
         };
 
         window.addEventListener("beforeunload", handleExitEvent);
-        document.addEventListener("visibilitychange", () => {
+
+        // Ask Confirmation Before Logout on Tab Switch or App Minimize
+        const handleVisibilityChange = () => {
             if (document.hidden) {
-                handleLogout();
+                const confirmExit = window.confirm("You are about to exit the event. Do you want to continue?");
+                if (confirmExit) {
+                    handleLogout();
+                }
             }
-        });
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
 
         return () => {
             window.removeEventListener("beforeunload", handleExitEvent);
             window.removeEventListener("popstate", preventBackNavigation);
-            document.removeEventListener("visibilitychange", handleExitEvent);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
         };
 
     }, [isLoggedIn, navigate]);
