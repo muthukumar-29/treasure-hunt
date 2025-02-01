@@ -16,6 +16,8 @@ export default function Question() {
 
     const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') == "true");
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const encrypted = localStorage.getItem("encryptedClue") || "";
     const secretKey = "my-secret-key"
 
@@ -131,6 +133,8 @@ export default function Question() {
         e.preventDefault();
         if (!question) return;
 
+        setIsSubmitting(true);
+
         if (answer.trim().toLowerCase() === question.answer.trim().toLowerCase()) {
             try {
 
@@ -143,27 +147,26 @@ export default function Question() {
                     answeredBy: arrayUnion(lotNumber)
                 });
 
-                let i = 1;
-                if (i==1) {
-                    const eventRef = collection(db, "event");
-                    const currentDateAndTime = new Date();
-                    const qID = question.id;
-                    await addDoc(eventRef, { lotNumber, qID, currentDateAndTime })
-                    i++;
-                }
+                const eventRef = collection(db, "event");
+                const currentDateAndTime = new Date();
+                const qID = question.id;
+                await addDoc(eventRef, { lotNumber, qID, currentDateAndTime })
 
                 const decryptedClue = CryptoJS.AES.decrypt(encrypted, secretKey).toString(CryptoJS.enc.Utf8);
 
                 Swal.fire({
                     icon: 'success',
                     title: 'Congratulations!',
-                    text: `Here is your clue: ${decryptedClue}`,
+                    text: `${decryptedClue}`,
+                    timer: 5000
                 });
 
                 navigate("/qr-scanner")
 
             } catch (error) {
                 console.error("Error updating Firestore:", error);
+            }finally{
+                setIsSubmitting(false)
             }
         } else {
             Swal.fire({
@@ -171,6 +174,8 @@ export default function Question() {
                 title: 'Incorrect Answer',
                 text: 'Please try again.',
             });
+
+            setIsSubmitting(false);
         }
     };
 
@@ -194,7 +199,7 @@ export default function Question() {
                         <form onSubmit={handleSubmit}>
                             <input type="text" className="form-control" placeholder="Answer" onChange={(e) => setAnswer(e.target.value)} required />
 
-                            <button type="submit" className="btn btn-primary text-white mt-3 w-100">Submit</button>
+                            <button type="submit" className="btn btn-primary text-white mt-3 w-100" disabled={isSubmitting}>{isSubmitting ? "Submitting..." : "Submit"}</button>
                         </form>
                     </div>
 
