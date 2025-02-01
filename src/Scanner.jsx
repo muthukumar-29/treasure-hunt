@@ -36,7 +36,7 @@ export default function Scanner() {
 
             console.log(`User ${lotNumber} has completed ${userCompletedLevels} levels.`);
 
-            if (userCompletedLevels >= 6) {
+            if (userCompletedLevels >= 5) {
                 setTimeout(() => {
                     Swal.fire({
                         title: "Congratulations !!!",
