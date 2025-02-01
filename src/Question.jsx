@@ -143,10 +143,14 @@ export default function Question() {
                     answeredBy: arrayUnion(lotNumber)
                 });
 
-                const eventRef = collection(db, "event");
-                const currentDateAndTime = new Date();
-                const qID = question.id;
-                await addDoc(eventRef, { lotNumber, qID, currentDateAndTime })
+                let i = 1;
+                if (i==1) {
+                    const eventRef = collection(db, "event");
+                    const currentDateAndTime = new Date();
+                    const qID = question.id;
+                    await addDoc(eventRef, { lotNumber, qID, currentDateAndTime })
+                    i++;
+                }
 
                 const decryptedClue = CryptoJS.AES.decrypt(encrypted, secretKey).toString(CryptoJS.enc.Utf8);
 
