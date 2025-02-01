@@ -32,40 +32,37 @@ export default function Question() {
             navigate('/login');
         } else {
             enableFullScreen();
-            // fetchEventStatus();
+            fetchEventStatus();
         }
 
-        const handleBeforeUnload = (e) => {
-            e.preventDefault();
-            e.returnValue = "Do you want to exit from the event?";
-            handleLogout();
-        };
-
+        // Prevent Back Navigation
         const preventBackNavigation = () => {
             window.history.pushState(null, null, window.location.href);
-        }
-
-        const handleNavigationAttempt = (e) => {
-            e.preventDefault();
-            const confirmExit = window.confirm("Do you want to exit from the event?");
-            if (!confirmExit) {
-                window.history.pushState(null, null, window.location.href);
-            } else {
-                handleLogout();
-            }
         };
 
         window.history.pushState(null, null, window.location.href);
         window.addEventListener("popstate", preventBackNavigation);
-        window.addEventListener("popstate", handleNavigationAttempt);
-        window.addEventListener("beforeunload", handleBeforeUnload);
 
-        return () => {
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-            window.removeEventListener("popstate", handleNavigationAttempt);
+        // Logout on Browser Close, Refresh, or Tab Switch
+        const handleExitEvent = (e) => {
+            e.preventDefault();
+            handleLogout();
         };
 
-    }, [isLoggedIn, navigate])
+        window.addEventListener("beforeunload", handleExitEvent);
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                handleLogout();
+            }
+        });
+
+        return () => {
+            window.removeEventListener("beforeunload", handleExitEvent);
+            window.removeEventListener("popstate", preventBackNavigation);
+            document.removeEventListener("visibilitychange", handleExitEvent);
+        };
+
+    }, [isLoggedIn, navigate]);
 
     const enableFullScreen = () => {
         const element = document.documentElement;
@@ -81,14 +78,12 @@ export default function Question() {
     };
 
     const handleLogout = () => {
-        const confirmLogout = window.confirm("Are you sure to Quit the Event?");
+        alert("You have exited the event. Logging out...");
+        navigate("/login");
+        localStorage.clear();
+        setIsLoggedIn(false);
+    };
 
-        if (confirmLogout) {
-            navigate("/login");
-            localStorage.clear();
-            setIsLoggedIn(false);
-        }
-    }
 
 
     useEffect(() => {
@@ -168,7 +163,7 @@ export default function Question() {
 
             } catch (error) {
                 console.error("Error updating Firestore:", error);
-            }finally{
+            } finally {
                 setIsSubmitting(false)
             }
         } else {
