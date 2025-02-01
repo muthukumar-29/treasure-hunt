@@ -1,6 +1,6 @@
 import CryptoJS from "crypto-js"
 import { useState, useEffect } from "react";
-import { collection, getDocs, updateDoc, doc, arrayUnion, addDoc } from "firebase/firestore";
+import { collection, getDocs, updateDoc, doc, arrayUnion, addDoc, query, orderBy } from "firebase/firestore";
 import db from "./firebase/firebase-config";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,8 @@ export default function Question() {
     const [question, setQuestion] = useState(null);
     const [loading, setLoading] = useState(true);
     const [answer, setAnswer] = useState("");
+
+    const [eventData, setEventStatus] = useState([]);
 
     const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') == "true");
 
@@ -30,6 +32,7 @@ export default function Question() {
             navigate('/login');
         } else {
             enableFullScreen();
+            // fetchEventStatus();
         }
 
         const handleBeforeUnload = (e) => {
@@ -89,7 +92,6 @@ export default function Question() {
 
 
     useEffect(() => {
-
         const fetchQuestion = async () => {
             try {
                 const lotNumber = localStorage.getItem('lotNumber') || 'ananymous';
@@ -154,11 +156,12 @@ export default function Question() {
 
                 const decryptedClue = CryptoJS.AES.decrypt(encrypted, secretKey).toString(CryptoJS.enc.Utf8);
 
+                fetchEventStatus();
+
                 Swal.fire({
                     icon: 'success',
                     title: 'Congratulations!',
-                    text: `${decryptedClue}`,
-                    timer: 5000
+                    text: `${decryptedClue}`
                 });
 
                 navigate("/qr-scanner")
@@ -178,6 +181,48 @@ export default function Question() {
             setIsSubmitting(false);
         }
     };
+
+    const fetchEventStatus = async () => {
+        try {
+            const eventRef = collection(db, "event");
+
+            const eventQuery = query(eventRef, orderBy("currentDateAndTime"))
+
+            const querySnapshot = await getDocs(eventQuery);
+
+            const queryList = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }))
+
+            console.log(queryList);
+
+            setEventStatus(queryList);
+
+            const lotNumber = localStorage.getItem('lotNumber');
+            const userCompletedLevels = queryList.filter(event => event.lotNumber === lotNumber).length;
+
+            console.log(`User ${lotNumber} has completed ${userCompletedLevels} levels.`);
+
+            if (userCompletedLevels >= 5) {
+                setTimeout(() => {
+                    Swal.fire({
+                        title: "Congratulations !!!",
+                        text: "You have successfully completed all 5 levels.",
+                        icon: "success"
+                    });
+
+                    localStorage.clear();
+                    setIsLoggedIn(false);
+                    navigate("/login");
+
+                }, 1000);
+            }
+
+        } catch (error) {
+            console.error("error to fetch Event status", error);
+        }
+    }
 
     return (
         <div>

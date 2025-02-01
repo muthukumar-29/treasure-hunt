@@ -40,7 +40,7 @@ export default function Scanner() {
                 setTimeout(() => {
                     Swal.fire({
                         title: "Congratulations !!!",
-                        text: "You have successfully completed all 6 levels.",
+                        text: "You have successfully completed all 5 levels.",
                         icon: "success"
                     });
 
