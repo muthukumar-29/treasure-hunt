@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import code_logo from "../public/images/coding.png";
-import qr_logo from "../public/images/qr-code.png";
+import Logo from '../public/images/Mystery Hunt (1).png'
 import db from "./firebase/firebase-config";
 import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
@@ -123,10 +122,11 @@ export default function Login() {
             
             <div className="container mt-5 vh-100">
                 <div className="text-center d-flex justify-content-around">
-                    <img src={qr_logo} width={100} alt="code_logo" />
-                    <img src={code_logo} width={100} alt="code_logo" />
-                </div><br />
-                <h1 className="text-center">Login</h1>
+                    {/* <img src={qr_logo} width={100} alt="code_logo" />
+                    <img src={code_logo} width={100} alt="code_logo" /> */}
+                    <img src={Logo} alt="" className="img-fluid" width={200}/>
+                </div>
+                <h3 className="text-center">Start Track Your Treasure</h3>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label>Email</label><span className="text-danger">*</span>
@@ -135,9 +135,9 @@ export default function Login() {
                     <div className="form-group">
                         <label>Lot Number</label><span className="text-danger">*</span>
                         <input type="number" className="form-control" placeholder="Lot Number" onChange={(e) => setLotNumber(e.target.value)} />
-                    </div>
+                    </div><br/>
                     <div className="text-center">
-                        <input type="submit" value="Start" className="btn btn-success text-white" />
+                        <input type="submit" value="Start" className="btn btn-outline-success btn-block" />
                     </div>
                 </form>
             </div>

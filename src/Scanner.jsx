@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { QrReader } from "react-qr-reader";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import db from "./firebase/firebase-config";
-import Swal from "sweetalert2";
+// import Swal from "sweetalert2";
 
 export default function Scanner() {
 
@@ -37,18 +37,21 @@ export default function Scanner() {
             console.log(`User ${lotNumber} has completed ${userCompletedLevels} levels.`);
 
             if (userCompletedLevels >= 5) {
-                setTimeout(() => {
-                    Swal.fire({
-                        title: "Congratulations !!!",
-                        text: "You have successfully completed all 5 levels.",
-                        icon: "success"
-                    });
 
-                    localStorage.clear();
-                    setIsLoggedIn(false);
-                    navigate("/login");
+                navigate('/qr-scanner');
 
-                }, 1000);
+                // setTimeout(() => {
+                //     Swal.fire({
+                //         title: "Congratulations !!!",
+                //         text: "You have successfully completed all 5 levels.",
+                //         icon: "success"
+                //     });
+
+                //     localStorage.clear();
+                //     setIsLoggedIn(false);
+                //     navigate("/login");
+
+                // }, 1000);
             }
 
         } catch (error) {
@@ -184,11 +187,11 @@ export default function Scanner() {
                     style={{ width: "100%" }}
                 />
 
-                <div className="text-center">
+                {/* <div className="text-center">
                     <button onClick={handleLogout} className="btn btn-danger mt-3">
                         Quit Event
                     </button>
-                </div>
+                </div> */}
             </div>
         </>
     )
