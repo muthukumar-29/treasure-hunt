@@ -200,18 +200,29 @@ export default function Question() {
             console.log(`User ${lotNumber} has completed ${userCompletedLevels} levels.`);
 
             if (userCompletedLevels >= 5) {
-                setTimeout(() => {
-                    Swal.fire({
-                        title: "Congratulations !!!",
-                        text: "You have successfully completed all 5 levels.",
-                        icon: "success"
-                    });
+                
+                const decryptedClue = CryptoJS.AES.decrypt(encrypted, secretKey).toString(CryptoJS.enc.Utf8);
 
-                    localStorage.clear();
-                    setIsLoggedIn(false);
-                    navigate("/login");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Congratulations!',
+                    text: `${decryptedClue}`
+                });
 
-                }, 1000);
+                navigate("/qr-scanner")
+
+                // setTimeout(() => {
+                //     Swal.fire({
+                //         title: "Congratulations !!!",
+                //         text: "You have successfully completed all 5 levels.",
+                //         icon: "success"
+                //     });
+
+                //     localStorage.clear();
+                //     setIsLoggedIn(false);
+                //     navigate("/login");
+
+                // }, 1000);
             }
 
         } catch (error) {
