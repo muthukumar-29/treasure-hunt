@@ -37,21 +37,7 @@ export default function Scanner() {
             console.log(`User ${lotNumber} has completed ${userCompletedLevels} levels.`);
 
             if (userCompletedLevels >= 5) {
-
                 navigate('/qr-scanner');
-
-                // setTimeout(() => {
-                //     Swal.fire({
-                //         title: "Congratulations !!!",
-                //         text: "You have successfully completed all 5 levels.",
-                //         icon: "success"
-                //     });
-
-                //     localStorage.clear();
-                //     setIsLoggedIn(false);
-                //     navigate("/login");
-
-                // }, 1000);
             }
 
         } catch (error) {
@@ -154,6 +140,7 @@ export default function Scanner() {
                     })
 
                     scannedQrList.push(encryptedClue);
+                    fetchEventStatus();
                     localStorage.setItem("scannedQrList", JSON.stringify(scannedQrList));
 
                     navigate('/question');
