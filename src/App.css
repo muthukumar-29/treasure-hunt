@@ -10,3 +10,28 @@
     font-variation-settings:
         "wdth" 100;
 }
+
+.initial{
+    background-image: url("./assets/bg_home2.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 650px;
+}
+
+.initial h1{
+    color: #E69E3B;
+    text-shadow: 3px 3px black;
+    padding-top: 400px;
+    font-size: 120px;
+}
+
+.copyright{
+    background: black;
+}
+
+@media (max-width: 426px){
+    .initial h1{
+        padding-top: 200px;
+        font-size: 100px;
+    }
+}
